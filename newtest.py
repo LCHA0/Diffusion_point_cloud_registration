@@ -22,19 +22,25 @@ torch.backends.cudnn.deterministic = True
 
 
 def init_option(option):
-    option.is_debug_mode = False
+    option.is_debug_mode_mode = False
     option.test_mode = True
-    option.schedule_kind = ["linear", "cosine"][1]
+    option.scheduler_variant = ["linear", "cosine"][1]
 
     option.save_results = True
-    option.diffusion_stepss = 5
+    option.diffusion_steps = 5
     option.beta_start = 0.2
     option.beta_end = 0.8
     option.noise_level_r = 0.1
     option.noise_level_t = 0.01
     option.enable_noise = True
 
+    # ⚠️ 补上 S 的默认值，否则 diffusion_scheduler 里会报 NoneType 错误
+    if not hasattr(option, 'S') or option.S is None:
+        option.S = 0.008
+    print(f"Initialized option.S = {option.S}")
+
     return option
+
 
 # ========== 模型加载 ==========
 def get_model(option):
@@ -77,7 +83,7 @@ def main(option):
 
             H_t = torch.eye(4)[None].expand(B, -1, -1).to(option.device)
 
-            for t in range(option.diffusion_stepss, 1, -1):
+            for t in range(option.diffusion_steps, 1, -1):
                 X_t = (H_t[:, :3, :3] @ X.transpose(2, 1) + H_t[:, :3, [3]]).transpose(2, 1)
                 X_normal_t = (H_t[:, :3, :3] @ X_normal.transpose(2, 1)).transpose(2, 1)
 
@@ -113,7 +119,7 @@ def main(option):
 
     # ===== 保存结果字典 =====
     if option.save_results:
-        save_path = f"./results/mytest_results2_T{option.diffusion_stepss}.pth"
+        save_path = f"./results/mytest_results_T{option.diffusion_steps}.pth"
         save_data(save_path, rcd)
         print(f"✅ 测试完成，预测结果已保存到: {save_path}")
 
@@ -121,12 +127,11 @@ def main(option):
 if __name__ == '__main__':
     # 基本配置
     option.device = "cuda" if torch.cuda.is_available() else "cpu"
-    option.diffusion_stepss = 5
+    option.diffusion_steps = 5
     option.save_results = True
 
     # 数据路径
-    option.src_dir = "./my_dataset/group2/src"
-    option.model_dir = "./my_dataset/group2/model"
+    option.src_dir = "./my_dataset/group1/src"
+    option.model_dir = "./my_dataset/group1/model"
 
     main(option)
-
