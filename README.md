@@ -7,3 +7,6 @@ test命令：python my_test.py
 
 2025.10.16
 现在直接看open3d文件夹，final.py配准程序，会把转换矩阵保存在txt里，visualize.py是可视化代码，scanpoints.py是对cad点云取ROI的代码
+
+2026.2.22
+还是看open3d文件夹，ransac是配准程序，fitting是焊缝拟合程序
